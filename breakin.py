@@ -12,6 +12,8 @@ PROJ_BG = 0, 0xFF, 00
 PROJ_HEIGHT = BAR_HEIGHT
 PROJ_WIDTH = PROJ_HEIGHT
 BOUNCE_CONSTANT = 2
+COLLISION_PADDING = 10
+BAR_SPEED = 2
 
 # x,y = left,top
 bar_x = WINDOW_WIDTH/2 - BAR_WIDTH/2
@@ -39,10 +41,10 @@ while 1:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_d:
                 paused = False
-                bar_dx = 2
+                bar_dx = BAR_SPEED
             if event.key == pygame.K_a:
                 paused = False
-                bar_dx = -2
+                bar_dx = -BAR_SPEED
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_d or event.key == pygame.K_a:
                 bar_dx = 0
@@ -71,14 +73,19 @@ while 1:
         if nproj_rect.colliderect(bar_rect):
             # from right
             if nproj_x < bar_x + BAR_WIDTH and nproj_x + PROJ_WIDTH > bar_x + BAR_WIDTH:
-                nproj_x += 10
+                nproj_x += COLLISION_PADDING
                 proj_dx = BOUNCE_CONSTANT
             #from left
             elif nproj_x < bar_x + BAR_WIDTH and nproj_x + PROJ_WIDTH < bar_x + BAR_WIDTH:
-                nproj_x -= 10
+                nproj_x -= COLLISION_PADDING
+                proj_dx = -BOUNCE_CONSTANT
+            
+            # influence projectile refraction with bar
+            if bar_dx > 0:
+                proj_dx = BOUNCE_CONSTANT
+            elif bar_dx < 0:
                 proj_dx = -BOUNCE_CONSTANT
 
-            # if bar_dx
             proj_dy *= -1
 
         proj_x = nproj_x
