@@ -10,17 +10,17 @@ BAR_HEIGHT = 50
 PROJ_BG = 0, 0xFF, 00
 PROJ_HEIGHT = BAR_HEIGHT
 PROJ_WIDTH = PROJ_HEIGHT
-BOUNCE_CONSTANT = 9.8
+BOUNCE_CONSTANT = 2
 
 # x,y = left,top
 bar_x = WINDOW_WIDTH/2 - BAR_WIDTH/2
-bar_y = WINDOW_HEIGHT - 2*BAR_HEIGHT
-bar_dx = 1
+bar_y = WINDOW_HEIGHT - 3*BAR_HEIGHT
+bar_dx = 2
 bar_dy = 1
 
 proj_x = WINDOW_WIDTH/2 - PROJ_HEIGHT/2
 proj_y = 0
-proj_dx = 0
+proj_dx = 0.1
 proj_dy = 1
 
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -57,7 +57,15 @@ while 1:
     proj_rect = pygame.Rect(proj_x, proj_y, PROJ_WIDTH, PROJ_HEIGHT);
     nproj_rect = pygame.Rect(nproj_x, nproj_y, PROJ_WIDTH, PROJ_HEIGHT);
     if nproj_rect.colliderect(bar_rect):
-        proj_dx *= -1
+        # from right
+        if nproj_x < bar_x + BAR_WIDTH and bar_dx != 0:
+            nproj_x += 10
+            proj_dx = BOUNCE_CONSTANT
+        # from left
+        elif nproj_x + PROJ_WIDTH > bar_x and bar_dx != 0:
+            print('from left')
+            nproj_x -= 10
+            proj_dx = -BOUNCE_CONSTANT
         proj_dy *= -1
 
     proj_x = nproj_x
