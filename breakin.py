@@ -1,4 +1,4 @@
-from collections import namedtuple
+from dataclasses import dataclass
 import sys, pygame
 
 pygame.init()
@@ -18,6 +18,7 @@ BAR_SPEED = 2
 TARGET_BG = 0, 0, 0xFF
 TARGET_WIDTH = 100
 TARGET_HEIGHT = 50
+TARGET_PADDING = 25
 
 # x,y = left,top
 bar_x = WINDOW_WIDTH/2 - BAR_WIDTH/2
@@ -28,9 +29,18 @@ proj_x = WINDOW_WIDTH/2 - PROJ_HEIGHT/2
 proj_y = WINDOW_HEIGHT - 3*BAR_HEIGHT - PROJ_HEIGHT
 proj_dx = 1
 proj_dy = 1
-Target = namedtuple('Target', ['x', 'y', 'dead'])
+
+@dataclass
+class Target:
+    x: float
+    y: float
+    dead: bool = False
 targets = [
-    Target(x=100, y=100, dead=False)
+    Target(x=100, y=100),
+    Target(x=100 + TARGET_WIDTH + TARGET_PADDING, y=100),
+    Target(x=100 + 2*(TARGET_WIDTH + TARGET_PADDING), y=100),
+    Target(x=100 + 3*(TARGET_WIDTH + TARGET_PADDING), y=100),
+    Target(x=100 + 4*(TARGET_WIDTH + TARGET_PADDING), y=100),
 ]
 
 paused = True
@@ -90,6 +100,14 @@ while 1:
                 proj_dx = -BOUNCE_CONSTANT
 
             proj_dy *= -1
+        
+        for target in targets:
+            if not target.dead:
+                target_rect = pygame.Rect(target.x, target.y, TARGET_WIDTH, TARGET_HEIGHT)
+                if nproj_rect.colliderect(target_rect):
+                    proj_dy *= -1
+                    target.dead = True
+                    break
 
         proj_x = nproj_x
         proj_y = nproj_y
