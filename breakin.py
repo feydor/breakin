@@ -1,3 +1,4 @@
+from pickle import TRUE
 import sys, pygame
 pygame.init()
 
@@ -20,9 +21,10 @@ bar_dy = 1
 
 proj_x = WINDOW_WIDTH/2 - PROJ_HEIGHT/2
 proj_y = 0
-proj_dx = 0.1
+proj_dx = 1
 proj_dy = 1
 
+paused = True
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 def clamp(val, lower_bound, upper_bound):
@@ -34,42 +36,54 @@ def clamp(val, lower_bound, upper_bound):
 while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_d:
+                paused = False
+                bar_dx = 2
+            if event.key == pygame.K_a:
+                paused = False
+                bar_dx = -2
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_d or event.key == pygame.K_a:
+                bar_dx = 0
+    
+    if pygame.key.get_pressed()[pygame.K_SPACE]:
+        paused = True
+    
 
-    if pygame.key.get_pressed()[pygame.K_d]:
+    if not paused:
+        # update projectile
+        nproj_x = proj_x + proj_dx
+        nproj_y = proj_y + proj_dy
+
+        # collison detection of projectile
+        if nproj_x < 0 or nproj_x > WINDOW_WIDTH - PROJ_WIDTH:
+            nproj_x = proj_x - proj_dx
+            proj_dx *= -1
+        if proj_y < 0 or proj_y > WINDOW_HEIGHT - PROJ_HEIGHT:
+            nproj_y = proj_y - proj_dy
+            proj_dy *= -1
+
+        # check proj collision with bar
+        bar_rect = pygame.Rect(bar_x, bar_y, BAR_WIDTH, BAR_HEIGHT);
+        proj_rect = pygame.Rect(proj_x, proj_y, PROJ_WIDTH, PROJ_HEIGHT);
+        nproj_rect = pygame.Rect(nproj_x, nproj_y, PROJ_WIDTH, PROJ_HEIGHT);
+        if nproj_rect.colliderect(bar_rect):
+            # from right
+            if nproj_x < bar_x + BAR_WIDTH and nproj_x + PROJ_WIDTH > bar_x + BAR_WIDTH:
+                nproj_x += 10
+                proj_dx = BOUNCE_CONSTANT
+            #from left
+            elif nproj_x < bar_x + BAR_WIDTH and nproj_x + PROJ_WIDTH < bar_x + BAR_WIDTH:
+                nproj_x -= 10
+                proj_dx = -BOUNCE_CONSTANT
+
+            # if bar_dx
+            proj_dy *= -1
+
+        proj_x = nproj_x
+        proj_y = nproj_y
         bar_x = clamp(bar_x + bar_dx, 0, WINDOW_WIDTH - BAR_WIDTH)
-    if pygame.key.get_pressed()[pygame.K_a]:
-        bar_x = clamp(bar_x - bar_dx, 0, WINDOW_WIDTH - BAR_WIDTH)
-
-    # update projectile
-    nproj_x = proj_x + proj_dx
-    nproj_y = proj_y + proj_dy
-
-    # collison detection of projectile
-    if nproj_x < 0 or nproj_x > WINDOW_WIDTH - PROJ_WIDTH:
-        nproj_x = proj_x - proj_dx
-        proj_dx *= -1
-    if proj_y < 0 or proj_y > WINDOW_HEIGHT - PROJ_HEIGHT:
-        nproj_y = proj_y - proj_dy
-        proj_dy *= -1
-
-    # check proj collision with bar
-    bar_rect = pygame.Rect(bar_x, bar_y, BAR_WIDTH, BAR_HEIGHT);
-    proj_rect = pygame.Rect(proj_x, proj_y, PROJ_WIDTH, PROJ_HEIGHT);
-    nproj_rect = pygame.Rect(nproj_x, nproj_y, PROJ_WIDTH, PROJ_HEIGHT);
-    if nproj_rect.colliderect(bar_rect):
-        # from right
-        if nproj_x < bar_x + BAR_WIDTH and bar_dx != 0:
-            nproj_x += 10
-            proj_dx = BOUNCE_CONSTANT
-        # from left
-        elif nproj_x + PROJ_WIDTH > bar_x and bar_dx != 0:
-            print('from left')
-            nproj_x -= 10
-            proj_dx = -BOUNCE_CONSTANT
-        proj_dy *= -1
-
-    proj_x = nproj_x
-    proj_y = nproj_y
 
     window.fill(COLOR_BG)
     pygame.draw.rect(window, BAR_BG, (bar_x, bar_y, BAR_WIDTH, BAR_HEIGHT))
