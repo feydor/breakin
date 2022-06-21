@@ -134,7 +134,7 @@ def update(dt):
         t = None
         if len([t for target in targets if not target.dead]) == 0:
             curr_level += 1
-            if curr_level > len(level_filenames):
+            if curr_level == len(level_filenames):
                 curr_level = 0
             targets = fill_targets(parse.level(level_filenames[curr_level]), x=TARGET_GROUP_LEFT, y=TARGET_GROUP_TOP)
 
