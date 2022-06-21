@@ -22,8 +22,8 @@ TARGET_PADDING = 15
 FPS = 60
 DELTA_TIME_SEC = 1.0/FPS
 BAR_Y = WINDOW_HEIGHT - 3*BAR_HEIGHT
-TARGET_GROUP_LEFT = 100
-TARGET_GROUP_TOP = 75
+TARGET_GROUP_LEFT = 50
+TARGET_GROUP_TOP = 25
 
 # x,y = left,top
 bar_x = WINDOW_WIDTH/2 - BAR_WIDTH/2
@@ -43,13 +43,15 @@ class Target:
     y: float
     dead: bool = False
 
-targets = []
+def fill_targets(nrows, x, y):
+    targets = []
+    n_targets_wide = (WINDOW_WIDTH - x) // (TARGET_WIDTH + TARGET_PADDING)
+    for i in range(0, nrows):
+        for j in range(0, n_targets_wide):
+            targets.append(Target(x=x + j*(TARGET_WIDTH + TARGET_PADDING), y=y + i*(TARGET_HEIGHT + TARGET_PADDING)))
+    return targets
 
-TARGETS_PER_ROW = 7
-NROWS = 4
-for i in range(0, NROWS):
-    for j in range(0, TARGETS_PER_ROW):
-        targets.append(Target(x=TARGET_GROUP_LEFT + j*(TARGET_WIDTH + TARGET_PADDING), y=TARGET_GROUP_TOP + i*(TARGET_HEIGHT + TARGET_PADDING)))
+targets = fill_targets(nrows=4, x=TARGET_GROUP_LEFT, y=TARGET_GROUP_TOP)
 
 def bar_rect(x):
     global BAR_Y
