@@ -56,6 +56,9 @@ def bar_rect(x):
 def proj_rect(x, y):
     return pygame.Rect(x, y, PROJ_WIDTH, PROJ_HEIGHT)
 
+def target_rect(x, y):
+    return pygame.Rect(x, y, TARGET_WIDTH, TARGET_HEIGHT)
+
 def overlap(r1, r2):
     return r1.colliderect(r2)
 
@@ -74,7 +77,13 @@ def horiz_collision(dt):
     if proj_nx < 0 or proj_nx + PROJ_WIDTH > WINDOW_WIDTH or overlap(proj_rect(proj_nx, proj_y), bar_rect(bar_x)):
         proj_dx *= -1
         return
-    
+
+    for target in targets:
+        if not target.dead:
+            if overlap(proj_rect(proj_nx, proj_y), target_rect(target.x, target.y)):
+                target.dead = True
+                proj_dx *= -1
+                return
     proj_x = proj_nx
     return None
 
@@ -82,10 +91,21 @@ def vert_collision(dt):
     global bar_x
     global proj_y
     global proj_dy
+    global proj_dx
     proj_ny = proj_y + proj_dy*PROJ_SPEED*dt
     if proj_ny < 0 or proj_ny + PROJ_HEIGHT > WINDOW_HEIGHT or overlap(proj_rect(proj_x, proj_ny), bar_rect(bar_x)):
+        # bar DI
+        if bar_dx > 0 and proj_dx < 0 or bar_dx < 0 and proj_dx > 0:
+            proj_dx *= -1
         proj_dy *= -1
         return
+    
+    for target in targets:
+        if not target.dead:
+            if overlap(proj_rect(proj_x, proj_ny), target_rect(target.x, target.y)):
+                target.dead = True
+                proj_dy *= -1
+                return
     proj_y = proj_ny
     return None
 
