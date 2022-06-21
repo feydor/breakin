@@ -1,7 +1,11 @@
 from dataclasses import dataclass
+from os import listdir
+from os.path import isfile, join
 import sys, pygame
+import parse
 pygame.init()
 
+LEVEL_DIR = 'levels'
 WINDOW_HEIGHT = 640
 WINDOW_WIDTH = 800
 COLOR_BG = 0x24, 0x24, 0x24
@@ -36,6 +40,8 @@ proj_dy = -1
 paused = True
 started = False
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+level_filenames = [join(LEVEL_DIR, f) for f in listdir(LEVEL_DIR) if isfile(join(LEVEL_DIR, f))]
+curr_level = 0
 
 @dataclass
 class Target:
@@ -43,15 +49,17 @@ class Target:
     y: float
     dead: bool = False
 
-def fill_targets(nrows, x, y):
+def fill_targets(level, x, y):
     targets = []
-    n_targets_wide = (WINDOW_WIDTH - x) // (TARGET_WIDTH + TARGET_PADDING)
-    for i in range(0, nrows):
-        for j in range(0, n_targets_wide):
-            targets.append(Target(x=x + j*(TARGET_WIDTH + TARGET_PADDING), y=y + i*(TARGET_HEIGHT + TARGET_PADDING)))
+    for i in range(0, level.rows):
+        for j in range(0, level.cols):
+            if level.targets[i][j]:
+                targets.append(Target(x=x + j*(TARGET_WIDTH + TARGET_PADDING), y=y + i*(TARGET_HEIGHT + TARGET_PADDING)))
     return targets
 
-targets = fill_targets(nrows=4, x=TARGET_GROUP_LEFT, y=TARGET_GROUP_TOP)
+
+level = parse.level(level_filenames[curr_level])
+targets = fill_targets(level, x=TARGET_GROUP_LEFT, y=TARGET_GROUP_TOP)
 
 def bar_rect(x):
     global BAR_Y
