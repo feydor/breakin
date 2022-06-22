@@ -40,6 +40,7 @@ proj_dy = -1
 paused = True
 started = False
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption('breakin')
 level_filenames = [join(LEVEL_DIR, f) for f in listdir(LEVEL_DIR) if isfile(join(LEVEL_DIR, f))]
 curr_level = 0
 
